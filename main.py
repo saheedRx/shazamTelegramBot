@@ -48,6 +48,13 @@ def welcome(message):
     bot.send_message(message.chat.id, "Send audio or voice message to start using the bot")
 
 
+def escape_markdown(text: str):
+    esc = '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
+    for ch in esc:
+        if ch in text:
+            text = text.replace(ch, '\\' + ch)
+    return text
+
 @bot.message_handler(content_types=["audio", "voice"])
 def handle_audio(message):
     type_is_voice = message.content_type == "voice"
@@ -62,16 +69,18 @@ def handle_audio(message):
         bot.reply_to(message, "Sorry, couldn't recognize any song. Try sending a longer sample")
     else:
         track = serialize_track(data['track'])
-        caption = f"{track.subtitle} - {track.title}"
+        song_name = escape_markdown(f'{track.subtitle} - {track.title}')
+        caption = f"[{song_name}]({track.apple_music_url})"
         # photo_url = track.photo_url
         photo_url = data['track']['images']['coverarthq']
         if photo_url:
             cover_path = download_cover_and_return_path(message.id, photo_url)
             cover = open(cover_path, "rb")
-            bot.send_photo(message.chat.id, cover, caption=caption, reply_to_message_id=message.id)
+            bot.send_photo(message.chat.id, cover, caption=caption,
+                           reply_to_message_id=message.id, parse_mode="MarkdownV2")
             cover.close()
         else:
-            bot.reply_to(message, caption)
+            bot.reply_to(message, caption, parse_mode="MarkdownV2")
     shutil.rmtree(os.path.join(TEMP_FOLDER, str(message.id)))
 
 

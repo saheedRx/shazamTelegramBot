@@ -18,6 +18,7 @@ def download_file_and_return_path(cache_id, file_id):
     filename = file_info.file_path.split("/")[-1]  # get filename from filepath
     resp = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(TOKEN, file_info.file_path))
     folder = os.path.join(TEMP_FOLDER, str(cache_id))  # get temp folder name for specific audio sample
+    assert not os.path.exists(folder)
     os.mkdir(folder)  # create such folder
     filepath = os.path.join(folder, filename)
     with open(filepath, "wb") as f:
@@ -29,6 +30,7 @@ def download_cover_and_return_path(cache_id, url):
     name = url.split("/")[-1]  # get cover's filename from the last part of URL
     resp = requests.get(url)
     folder = os.path.join(TEMP_FOLDER, str(cache_id))  # get temp folder name for track's covers
+    assert os.path.exists(folder)
     filepath = os.path.join(folder, name)
     with open(filepath, "wb") as f:
         f.write(resp.content)  # write downloaded track cover to sample's temp folder

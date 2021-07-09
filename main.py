@@ -55,6 +55,7 @@ def escape_markdown(text: str):
             text = text.replace(ch, '\\' + ch)
     return text
 
+
 @bot.message_handler(content_types=["audio", "voice"])
 def handle_audio(message):
     type_is_voice = message.content_type == "voice"
